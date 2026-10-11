@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG Lab — Interactive Simulator</title>
+<style>
+:root{--bg:#0b1020;--panel:#121a2e;--panel2:#18233b;--line:#2b3957;--text:#edf3ff;--muted:#a7b6d2;--cyan:#5de1e6;--blue:#7aa7ff;--purple:#bd9cff;--green:#7ce3b1;--orange:#ffca7a;--red:#ff8d9b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 20% 0%,#18294b 0,transparent 38%),var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+header{max-width:1200px;margin:auto;padding:30px 22px 16px}h1{font-size:clamp(27px,4vw,42px);line-height:1.1;margin:0 0 10px;letter-spacing:-.04em}h1 span{color:var(--cyan)}p{margin:7px 0;color:var(--muted)}.eyebrow{text-transform:uppercase;letter-spacing:.15em;color:var(--cyan);font-size:11px;font-weight:800}
+main{max-width:1200px;margin:auto;padding:0 22px 45px}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0 20px}.btn{border:1px solid var(--line);background:#202d49;color:var(--text);padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700}.btn:hover{border-color:var(--cyan)}.btn.primary{background:var(--cyan);color:#071421;border-color:var(--cyan)}.btn:disabled{opacity:.35;cursor:not-allowed}.progress{height:5px;background:#202a42;border-radius:8px;overflow:hidden;flex:1;min-width:120px}.progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--purple));transition:width .25s}.stepnav{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:14px 0 20px}.stepchip{background:var(--panel);border:1px solid var(--line);padding:10px;border-radius:10px;color:var(--muted);cursor:pointer;text-align:left;font-size:12px}.stepchip b{display:block;font-size:13px;color:var(--text);margin-bottom:3px}.stepchip.active{border-color:var(--cyan);background:#152b3a;box-shadow:inset 0 0 0 1px #5de1e633}.layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.85fr);gap:16px}.panel{background:linear-gradient(180deg,#141e34,#10182a);border:1px solid var(--line);border-radius:16px;padding:19px;min-width:0}.panel h2{font-size:19px;margin:0 0 5px}.panel h3{font-size:14px;margin:18px 0 8px}.sub{font-size:13px;color:var(--muted);margin:0 0 16px}.tag{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:99px;padding:4px 9px;color:var(--muted);font-size:11px}.tag.cyan{border-color:#39777d;color:var(--cyan)}.tag.green{border-color:#316e59;color:var(--green)}.tag.orange{border-color:#735b36;color:var(--orange)}label{display:block;color:var(--muted);font-size:12px;font-weight:700;margin:12px 0 6px}textarea,input,select{width:100%;background:#0c1425;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:11px;font:inherit;outline:none}textarea:focus,input:focus,select:focus{border-color:var(--cyan)}textarea{min-height:120px;resize:vertical}.fieldrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}.doc{border:1px solid var(--line);background:#0d1527;border-radius:11px;padding:12px;margin:8px 0}.dochead{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:5px}.docname{font-weight:800;font-size:13px}.small{font-size:12px;color:var(--muted)}.chunk{padding:12px;border:1px solid #344563;background:#101d33;border-radius:10px;margin:8px 0}.chunk .id{color:var(--cyan);font-size:11px;font-weight:800;letter-spacing:.07em}.chunk p{color:#d7e1f4;margin:5px 0 0;font-size:13px}.bars{display:grid;gap:10px}.barrow{display:grid;grid-template-columns:minmax(85px,1fr) 2fr 48px;gap:9px;align-items:center;font-size:12px}.bar{height:9px;background:#25314b;border-radius:99px;overflow:hidden}.bar span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--cyan))}.barrow strong{text-align:right;font-variant-numeric:tabular-nums}.vector{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}.dim{border:1px solid #32435f;border-radius:6px;padding:4px 6px;background:#0b1425;color:#c6d4ee;font:11px ui-monospace,monospace}.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:16px 0}.flow div{border:1px solid var(--line);background:#10192b;border-radius:9px;text-align:center;padding:10px 4px;font-size:11px;color:var(--muted)}.flow div.on{border-color:var(--cyan);color:var(--cyan);background:#102a35}.flow span{display:block;font-size:18px;margin-bottom:4px}.notice{padding:11px 12px;border-radius:10px;background:#17253c;border-left:3px solid var(--orange);color:#dbe6f8;font-size:12px;margin-top:12px}.answer{border:1px solid #356d5b;background:#10271f;border-radius:12px;padding:15px}.answer h3{margin:0 0 8px;color:var(--green)}.answer p{color:#e0f7eb}.citation{display:inline-block;background:#234c3d;color:#9af0c7;border-radius:5px;padding:1px 6px;font-size:11px}.metricgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.metric{background:#0c1425;border:1px solid var(--line);padding:10px;border-radius:9px}.metric strong{display:block;font-size:21px}.metric span{font-size:11px;color:var(--muted)}.explain{font-size:13px;color:#d2def2}.hidden{display:none!important}footer{max-width:1200px;margin:auto;padding:0 22px 25px;color:var(--muted);font-size:12px}code{color:var(--cyan)}@media(max-width:850px){.layout{grid-template-columns:1fr}.stepnav{grid-template-columns:repeat(3,1fr)}.flow{grid-template-columns:repeat(3,1fr)}}@media(max-width:500px){header,main{padding-left:14px;padding-right:14px}.stepnav{grid-template-columns:repeat(2,1fr)}.fieldrow{grid-template-columns:1fr}.panel{padding:14px}.barrow{grid-template-columns:85px 1fr 40px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="eyebrow">Interactive learning playground</div>
+ <h1>RAG <span>Lab</span></h1>
+ <p>Follow a question from raw documents to a grounded answer. Change the documents, tune retrieval, and inspect what each stage contributes.</p>
+ <div class="toolbar">
+  <button class="btn" id="reset">↺ Reset example</button>
+  <button class="btn primary" id="run">Run all steps →</button>
+  <div class="progress"><div id="progressbar"></div></div>
+  <span class="tag cyan" id="progresslabel">Step 1 of 6</span>
+ </div>
+ <div class="stepnav" id="stepnav">
+  <button class="stepchip active" data-step="0"><b>01 · Prepare</b>Documents</button>
+  <button class="stepchip" data-step="1"><b>02 · Chunk</b>Split text</button>
+  <button class="stepchip" data-step="2"><b>03 · Embed</b>Represent meaning</button>
+  <button class="stepchip" data-step="3"><b>04 · Retrieve</b>Rank chunks</button>
+  <button class="stepchip" data-step="4"><b>05 · Augment</b>Build context</button>
+  <button class="stepchip" data-step="5"><b>06 · Generate</b>Answer</button>
+ </div>
+</header>
+<main>
+<div class="layout">
+<section class="panel">
+ <div id="stepcontent"></div>
+ <div class="toolbar" style="margin-bottom:0">
+  <button class="btn" id="prev">← Previous</button><div style="flex:1"></div><button class="btn primary" id="next">Next step →</button>
+ </div>
+</section>
+<aside class="panel">
+ <h2>Pipeline at a glance</h2><p class="sub">The stages are connected, but they solve different problems.</p>
+ <div class="flow" id="flow">
+  <div class="on"><span>📚</span>Documents</div><div><span>✂️</span>Chunks</div><div><span>🧭</span>Embeddings</div><div><span>🔎</span>Retrieval</div><div><span>💬</span>Answer</div>
+ </div>
+ <div class="metricgrid">
+  <div class="metric"><strong id="mDocs">3</strong><span>Source documents</span></div>
+  <div class="metric"><strong id="mChunks">—</strong><span>Text chunks</span></div>
+  <div class="metric"><strong id="mHits">—</strong><span>Retrieved chunks</span></div>
+ </div>
+ <h3>What to remember</h3>
+ <div id="lesson" class="explain">RAG stands for Retrieval-Augmented Generation. Before the model answers, a retrieval step finds relevant material from your knowledge source.</div>
+ <div class="notice" id="caveat">This simulator uses a lightweight, transparent word-feature scoring method—not a real neural embedding model or an LLM. It illustrates the workflow, not production-quality semantic search.</div>
+ <h3>Glossary</h3>
+ <p class="small"><b>Corpus</b> — the documents you search.</p>
+ <p class="small"><b>Chunk</b> — a manageable piece of a document.</p>
+ <p class="small"><b>Embedding</b> — a numeric representation of meaning.</p>
+ <p class="small"><b>Similarity</b> — a score used to rank candidate chunks.</p>
+ <p class="small"><b>Grounding</b> — basing an answer on retrieved evidence.</p>
+</aside>
+</div>
+</main>
+<footer>Learning note: a production RAG system usually adds a real embedding model, vector index, metadata filters, prompt assembly, an LLM, citations, evaluation, and access controls.</footer>
+<script>
+const defaultDocs=[
+ {name:"Pet care guide",text:"Dogs need daily exercise, fresh water, balanced food, and regular veterinary checkups. Puppies often need more frequent meals and shorter training sessions. Watch for changes in appetite or energy."},
+ {name:"Veterinary visits",text:"Annual veterinary checkups help monitor a pet's health. Keep vaccination records and ask your veterinarian about parasite prevention. If a pet has trouble breathing, collapses, or has severe bleeding, seek urgent veterinary care."},
+ {name:"Adoption checklist",text:"Before adopting a dog, prepare a safe home, food and water bowls, a collar, a leash, and a comfortable bed. Ask the shelter about the dog's temperament, medical history, and exercise needs."}
+];
+let docs=JSON.parse(JSON.stringify(defaultDocs)),query="How often should my dog visit the vet?",chunkSize=34,overlap=6,topK=3,step=0,results=[],chunks=[],terms=[];
+const $=id=>document.getElementById(id);
+function escapeHTML(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function tokenize(s){return (s.toLowerCase().match(/[a-z0-9]+/g)||[]).filter(w=>!["the","a","an","is","are","to","of","and","or","my","how","what","when","should","does","do","for","in","on","with","about","your","you","i"].includes(w));}
+function makeChunks(){
+ chunks=[];let id=1;
+ docs.forEach((d,di)=>{
+  const words=d.text.split(/\s+/).filter(Boolean);
+  const stride=Math.max(1,chunkSize-overlap);
+  for(let i=0;i<words.length;i+=stride){
+   const part=words.slice(i,i+chunkSize).join(" ");
+   if(part.trim())chunks.push({id:"C"+String(id++).padStart(2,"0"),doc:d.name,di,text:part,words:tokenize(part)});
+   if(i+chunkSize>=words.length)break;
+  }
+ });
+}
+function scoreChunk(c){
+ const q=tokenize(query), vocab=[...new Set(q)];
+ // Explainable TF-IDF-like lexical proxy: weighted overlap with a mild rarity boost.
+ let score=0,matched=[];
+ vocab.forEach(w=>{if(c.words.includes(w)){let df=chunks.filter(x=>x.words.includes(w)).length;let idf=1+Math.log((chunks.length+1)/(df+1));score+=idf*(q.filter(x=>x===w).length);matched.push(w)}});
+ const denom=Math.sqrt(Math.max(1,c.words.length))*Math.sqrt(Math.max(1,q.length));
+ return {score:score/denom,matched};
+}
+function calc(){makeChunks();results=chunks.map(c=>({...c,...scoreChunk(c)})).sort((a,b)=>b.score-a.score).slice(0,topK);}
+function setStep(s){step=Math.max(0,Math.min(5,s));render();}
+function chunkHTML(c){return `<div class="chunk"><div class="dochead"><span class="id">${c.id} · ${escapeHTML(c.doc)}</span><span class="tag">${c.words.length} tokens*</span></div><p>${escapeHTML(c.text)}</p></div>`}
+function render(){
+ calc();
+ document.querySelectorAll(".stepchip").forEach(b=>b.classList.toggle("active",+b.dataset.step===step));
+ $("progressbar").style.width=((step+1)/6*100)+"%";$("progresslabel").textContent=`Step ${step+1} of 6`;
+ $("prev").disabled=step===0;$("next").textContent=step===5?"↺ Back to start":"Next step →";
+ $("mDocs").textContent=docs.length;$("mChunks").textContent=chunks.length;$("mHits").textContent=step>=3?results.filter(r=>r.score>0).length:"—";
+ const lessons=[
+  ["Prepare the knowledge source","RAG does not magically know your private documents. First, collect and clean the information that the system is allowed to search.","Documents are the evidence pool. Stale, duplicated, or missing information can limit every later stage."],
+  ["Chunking: make useful pieces","Long documents are split into smaller pieces. Chunk size and overlap affect whether a fact stays together or gets separated.","Too small: missing context. Too large: noisy retrieval and more context consumed. There is no universal best size."],
+  ["Embedding: represent content numerically","A real embedding model maps text into a vector. Similar meanings can land near each other even when they use different words.","Here, the displayed feature vector is an illustrative word-count vector. Real embedding dimensions are learned and usually not human-readable."],
+  ["Retrieval: find candidate evidence","The query is compared with stored chunks. The system ranks candidates and selects the top K to pass onward.","Retrieval quality matters: if the right evidence is not found, the generator may guess or give an incomplete answer."],
+  ["Augmentation: package the evidence","The user's question is combined with the selected chunks in a prompt, with instructions to answer from that evidence.","RAG adds context to the prompt; it does not retrain or permanently update the language model."],
+  ["Generation: answer using context","A language model reads the question plus retrieved evidence and writes a response. Citations can point back to source chunks.","RAG can reduce unsupported answers, but it cannot guarantee truth. Validate evidence, citations, and the final answer."]
+ ];
+ $("lesson").innerHTML=`<b>${lessons[step][0]}</b><br>${lessons[step][1]}<br><br><span style="color:var(--cyan)">Key idea:</span> ${lessons[step][2]}`;
+ const dform=`<h2>01 · Prepare your documents</h2><p class="sub">Edit the source material and question. These are the facts your RAG system can potentially use.</p>
+ <label>Question from the user</label><input id="queryInput" value="${escapeHTML(query)}">
+ <label>Knowledge base documents</label><p class="small">Use separate document cards. The simulator searches only the text entered here.</p>
+ ${docs.map((d,i)=>`<div class="doc"><div class="dochead"><span class="docname">Document ${i+1}</span><button class="btn removeDoc" data-i="${i}" style="padding:5px 8px;font-size:11px">Remove</button></div><label>Document title</label><input class="docnameinput" data-i="${i}" value="${escapeHTML(d.name)}"><label>Document text</label><textarea class="doctext" data-i="${i}">${escapeHTML(d.text)}</textarea></div>`).join("")}
+ <button class="btn" id="addDoc">+ Add document</button><div class="notice">Try changing “annual veterinary checkups” to “twice a year” in a document, then run the pipeline again. Watch how the available evidence changes.</div>`;
+ const cform=`<h2>02 · Chunking</h2><p class="sub">Split each document into overlapping word windows. This simple simulator uses word count rather than tokenization used by a real model.</p>
+ <div class="fieldrow"><div><label>Chunk size (words)</label><input id="chunkSize" type="number" min="8" max="100" value="${chunkSize}"></div><div><label>Overlap (words)</label><input id="overlap" type="number" min="0" max="30" value="${overlap}"></div></div>
+ <div class="metricgrid" style="margin:14px 0"><div class="metric"><strong>${chunks.length}</strong><span>Chunks created</span></div><div class="metric"><strong>${chunkSize}</strong><span>Words per chunk*</span></div><div class="metric"><strong>${overlap}</strong><span>Overlap words*</span></div></div>
+ <h3>Resulting chunks</h3>${chunks.map(chunkHTML).join("")}
+ <p class="small">*Last chunks can be shorter. Overlap helps preserve facts near chunk boundaries, but creates repeated text.</p>`;
+ const embed=`<h2>03 · Embedding</h2><p class="sub">In a real RAG pipeline, every chunk and the user query are converted into vectors by the same embedding model.</p>
+ <div class="notice">For teaching clarity, these are toy feature vectors—not real semantic embeddings. Each number represents the presence of a selected query term in the text.</div>
+ <h3>Query</h3><div class="chunk"><b>${escapeHTML(query)}</b><div class="vector">${tokenize(query).slice(0,12).map(w=>`<span class="dim">${escapeHTML(w)}:1</span>`).join("")||'<span class="dim">No searchable terms</span>'}</div></div>
+ <h3>Example chunk vectors</h3>${chunks.slice(0,Math.min(8,chunks.length)).map(c=>{let vocab=[...new Set(tokenize(query))].slice(0,8);return `<div class="chunk"><div class="id">${c.id} · ${escapeHTML(c.doc)}</div><div class="vector">${vocab.map(w=>`<span class="dim">${escapeHTML(w)}:${c.words.includes(w)?1:0}</span>`).join("")}</div><p>${escapeHTML(c.text)}</p></div>`}).join("")}
+ <p class="explain">Real embedding vectors may have hundreds or thousands of dimensions. They are not simple word-presence lists: training helps them capture patterns of meaning and usage.</p>`;
+ const retrieve=`<h2>04 · Retrieval</h2><p class="sub">Compare the question to each chunk, rank by score, and select the top K candidates.</p>
+ <div class="fieldrow"><div><label>Top K chunks</label><select id="topK">${[1,2,3,4,5].map(n=>`<option ${topK===n?'selected':''}>${n}</option>`).join("")}</select></div><div><label>Query being searched</label><input value="${escapeHTML(query)}" disabled></div></div>
+ <h3>Ranked candidates</h3><div class="bars">${results.map((r,i)=>`<div class="chunk"><div class="dochead"><span><b>#${i+1} · ${r.id}</b> <span class="small">${escapeHTML(r.doc)}</span></span><span class="tag ${r.score>0?'cyan':'orange'}">${r.score.toFixed(3)}</span></div><div class="bar"><span style="width:${Math.max(0,Math.min(100,r.score/(results[0]?.score||1)*100))}%"></span></div><p>${escapeHTML(r.text)}</p><p class="small">Matched query terms: ${r.matched.length?r.matched.map(escapeHTML).join(", "):"none"} ${r.score===0?"— this chunk has no lexical overlap":""}</p></div>`).join("")}</div>
+ <div class="notice">The score is a transparent lexical-overlap proxy, not cosine similarity from a production vector database. Real systems may use cosine similarity, dot product, hybrid keyword search, reranking, or metadata filters.</div>`;
+ const augment=`<h2>05 · Augmentation</h2><p class="sub">The retriever's selected chunks are inserted into the model prompt as supporting context.</p>
+ <label>Prompt sent to the generator (illustrative)</label><div class="chunk" style="font-family:ui-monospace,monospace;font-size:12px;white-space:pre-wrap;line-height:1.7"><span style="color:var(--purple)">SYSTEM</span>
+You are a helpful assistant. Answer the question using only the provided context. If the context does not contain the answer, say so. Cite the chunk IDs that support your answer.
+
+<span style="color:var(--cyan)">CONTEXT</span>
+${results.filter(r=>r.score>0).map(r=>`[${r.id} · ${r.doc}]\n${r.text}`).join("\n\n")||"(No relevant chunks were found.)"}
+
+<span style="color:var(--orange)">USER QUESTION</span>
+${query}</div>
+ <h3>What changed?</h3><p class="explain">The model receives both the question and selected evidence. The evidence is temporary prompt context for this answer—not a permanent change to model weights.</p>
+ <div class="metricgrid"><div class="metric"><strong>${results.filter(r=>r.score>0).length}</strong><span>Relevant chunks selected</span></div><div class="metric"><strong>${results.filter(r=>r.score>0).reduce((n,r)=>n+r.text.split(/\s+/).length,0)}</strong><span>Approx. context words</span></div><div class="metric"><strong>${topK}</strong><span>Top K setting</span></div></div>`;
+ const generate=`<h2>06 · Generation</h2><p class="sub">A real LLM generates the answer. This demo uses a small rule-based response so you can see how grounding and citations should work.</p>
+ <div class="answer"><h3>Illustrative grounded answer</h3><p>${makeAnswer()}</p><p>${results.filter(r=>r.score>0).slice(0,3).map(r=>`<span class="citation">${r.id}</span>`).join(" ")||'<span class="tag orange">No supporting chunks found</span>'}</p></div>
+ <h3>Inspect the result</h3><div class="doc"><b>Grounding check</b><p class="small">${results.some(r=>r.score>0)?"The answer can cite retrieved chunks, but you should still verify that each citation supports the exact claim.":"No chunk matched the query terms. A safe RAG system should say it could not find enough information rather than inventing an answer."}</p></div>
+ <div class="notice">RAG is not simply “chat with a PDF.” It is a pipeline: prepare → chunk → embed/index → retrieve → augment → generate → evaluate.</div>`;
+ const views=[dform,cform,embed,retrieve,augment,generate];
+ $("stepcontent").innerHTML=views[step];
+ $("flow").innerHTML=[["📚","Documents"],["✂️","Chunks"],["🧭","Embeddings"],["🔎","Retrieval"],["💬","Answer"]].map((a,i)=>`<div class="${(step===0&&i===0)||(step===1&&i===1)||(step===2&&i===2)||(step===3&&i===3)||(step>=4&&i===4)?"on":""}"><span>${a[0]}</span>${a[1]}</div>`).join("");
+ bindInputs();
+}
+function makeAnswer(){
+ const hits=results.filter(r=>r.score>0);
+ if(!hits.length)return "I couldn't find enough relevant information in the supplied documents to answer this question confidently. Add a document that directly addresses it, or rephrase the question.";
+ const q=query.toLowerCase();
+ if(/how often|how frequently|frequency|annual|yearly/.test(q)&&/vet|veterinar|checkup/.test(q)){
+  const h=hits.find(r=>/veterinar|checkup/.test(r.text.toLowerCase()));
+  if(h)return `The provided material says that annual veterinary checkups help monitor a pet's health. Ask your veterinarian whether your dog's age and health needs a different schedule. [${h.id}]`;
+ }
+ const relevant=hits.slice(0,2).map(r=>r.text.replace(/\s+/g," ").trim());
+ return `Based on the retrieved material: ${relevant.join(" ")} ${hits.slice(0,2).map(r=>`[${r.id}]`).join(" ")}`;
+}
+function bindInputs(){
+ const qi=$("queryInput");if(qi)qi.addEventListener("change",()=>{query=qi.value.trim()||"What does the knowledge base say?";render()});
+ document.querySelectorAll(".docnameinput").forEach(el=>el.addEventListener("change",()=>{docs[+el.dataset.i].name=el.value;render()}));
+ document.querySelectorAll(".doctext").forEach(el=>el.addEventListener("change",()=>{docs[+el.dataset.i].text=el.value;render()}));
+ document.querySelectorAll(".removeDoc").forEach(el=>el.addEventListener("click",()=>{if(docs.length>1){docs.splice(+el.dataset.i,1);render()}}));
+ const add=$("addDoc");if(add)add.addEventListener("click",()=>{docs.push({name:"New document",text:"Add your source text here."});render()});
+ const cs=$("chunkSize"),ov=$("overlap");if(cs)cs.addEventListener("change",()=>{chunkSize=Math.max(8,Math.min(100,+cs.value||34));overlap=Math.min(overlap,chunkSize-1);render()});if(ov)ov.addEventListener("change",()=>{overlap=Math.max(0,Math.min(chunkSize-1,+ov.value||0));render()});
+ const tk=$("topK");if(tk)tk.addEventListener("change",()=>{topK=+tk.value;render()});
+}
+$("prev").addEventListener("click",()=>setStep(step-1));$("next").addEventListener("click",()=>setStep(step===5?0:step+1));
+document.querySelectorAll(".stepchip").forEach(b=>b.addEventListener("click",()=>setStep(+b.dataset.step)));
+$("run").addEventListener("click",()=>{setStep(5)});
+$("reset").addEventListener("click",()=>{docs=JSON.parse(JSON.stringify(defaultDocs));query="How often should my dog visit the vet?";chunkSize=34;overlap=6;topK=3;setStep(0)});
+render();
+</script>
+</body>
+</html>
